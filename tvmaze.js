@@ -12,8 +12,19 @@ const $searchForm = $("#searchForm");
  *    (if no image URL given by API, put in a default image URL)
  */
 
-async function getShowsByTerm( /* term */) {
+const TVMAZE_BASE_URL = "http://api.tvmaze.com/"
+const SEARCH_HEADER = 'search/';
+const SHOWS_HEADER = 'shows';
+
+async function getShowsByTerm() {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
+  // Store promise inside variable
+    // Figure out how to get the promise using axios
+    //
+  // Navigate through JSON to correct data
+  let term = "star";
+  let response = await axios.get(`${TVMAZE_BASE_URL}` + `${SEARCH_HEADER}` + `${SHOWS_HEADER}`, { params: {q: term}});
+  console.log("getShowsByTerm called, response =" + response);
 
   return [
     {
