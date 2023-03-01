@@ -3,6 +3,9 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
+const TVMAZE_BASE_URL = "http://api.tvmaze.com/";
+const SEARCH_HEADER = 'search/';
+const SHOWS_HEADER = 'shows';
 
 
 /** Given a search term, search for tv shows that match that query.
@@ -12,74 +15,47 @@ const $searchForm = $("#searchForm");
  *    (if no image URL given by API, put in a default image URL)
  */
 
-const TVMAZE_BASE_URL = "http://api.tvmaze.com/"
-const SEARCH_HEADER = 'search/';
-const SHOWS_HEADER = 'shows';
 
 async function getShowsByTerm(term) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
-  // Store promise inside variable
-    // Figure out how to get the promise using axios
-    //
-  // Navigate through JSON to correct data
 
   let response = await axios.get(`${TVMAZE_BASE_URL}` + `${SEARCH_HEADER}` +
-  `${SHOWS_HEADER}`, { params: {q: term}});
-  console.log("getShowsByTerm called, response =" + response);
+    `${SHOWS_HEADER}`, { params: { q: term } });
 
-  let firstResponse = response.data[0].show;
-  console.log(firstResponse, "I am the first response!");
+  let responseData = response.data;
 
-  let idOfFirstResponse = firstResponse.id;
-  console.log(idOfFirstResponse);
-
-  let nameOfFirstResponse = firstResponse.name;
-  console.log(nameOfFirstResponse);
-
-  let sumOfFirstResponse = firstResponse.summary;
-  console.log(sumOfFirstResponse);
-
-  let imageOfFirstResponse = firstResponse.image;
-  console.log(imageOfFirstResponse);
-
-  return response;
-  // return [
-  //   {
-  //     id: 1767,
-  //     name: "The Bletchley Circle",
-  //     summary:
-  //       `<p><b>The Bletchley Circle</b> follows the journey of four ordinary
-  //          women with extraordinary skills that helped to end World War II.</p>
-  //        <p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their
-  //          normal lives, modestly setting aside the part they played in
-  //          producing crucial intelligence, which helped the Allies to victory
-  //          and shortened the war. When Susan discovers a hidden code behind an
-  //          unsolved murder she is met by skepticism from the police. She
-  //          quickly realises she can only begin to crack the murders and bring
-  //          the culprit to justice with her former friends.</p>`,
-  //     image:
-  //         "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg"
-  //   }
-  // ]
+  // Update response data to only include required info (map/loop/w/e)
+  return responseData;
 }
 
 
-/** Given list of shows, create markup for each and to DOM */
+/** Given list of shows, create markup for each and to DOM
+ * Iterates through array of shows in the response JSON, updates the DOM w/
+ * requested information.
+*/
 
 function populateShows(shows) {
   $showsList.empty();
+  let imageSrc = '';
 
+  console.log('Populate shows called, arrays = ' + shows);
   for (let show of shows) {
+    if (show.show.image === null) {
+      imageSrc = 'https://tinyurl.com/tv-missing';
+    } else {
+      imageSrc = show.show.image.original;
+    }
+    console.log(imageSrc)
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+      `<div data-show-id="${show.show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
-              alt="Bletchly Circle San Francisco"
+              src="${imageSrc}"
+              alt="PLACEHOLDER"
               class="w-25 me-3">
            <div class="media-body">
-             <h5 class="text-primary">${show.name}</h5>
-             <div><small>${show.summary}</small></div>
+             <h5 class="text-primary">${show.show.name}</h5>
+             <div><small>${show.show.summary}</small></div>
              <button class="btn btn-outline-light btn-sm Show-getEpisodes">
                Episodes
              </button>
@@ -88,7 +64,8 @@ function populateShows(shows) {
        </div>
       `);
 
-    $showsList.append($show);  }
+    $showsList.append($show);
+  }
 }
 
 
