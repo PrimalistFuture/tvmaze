@@ -7,6 +7,8 @@ const TVMAZE_BASE_URL = "http://api.tvmaze.com/";
 const SEARCH_HEADER = 'search/';
 const SHOWS_HEADER = 'shows';
 
+const $episodesList = $("episdoesList");
+
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -110,16 +112,23 @@ async function getEpisodesOfShow(id) {
   let episodesData = response.data;
   console.log("Get episode function called, episodesData = " + episodesData);
 
-  episodesData.map(episode => episode = episode.name);
+  // let episodesNames = episodesData.map(episode => episode = episode.name);
 
-  console.log(episodesData)
+  // console.log(episodesNames)
 
-  return episodesData;
+  // populateEpisodes(episodesNames);
+  return episodesData.map(episode => ({
+    id: episode.id,
+    name: episode.name,
+    season: episode.season,
+    number: episode.number
+  }));
  }
 
 /** Write a clear docstring for this function... */
 
-function populateEpisodes(episodes) {
+ function populateEpisodes(episodes) {
+  $episodesList.empty();
   // Iterate through array of episode data objects
     // Get episode name
     // Generate a <li> element
@@ -128,12 +137,88 @@ function populateEpisodes(episodes) {
 
   // TEMPORARY:
 
-  $episodesArea.show();
-  let episodesData = getEpisodesOfShow(1767);
 
-  for (let episode of episodesData) {
-    $episodesArea.append($(`<li>${episode.name}</li>`));
+  // let episodesData = getEpisodesOfShow(1767);
+
+  for (let episode of episodes) {
+    const $item = $(
+      `<li>
+       ${episode.name}
+       (season ${episode.season}, episode ${episode.number})
+     </li>
+    `);
+
+  $episodesList.append($item);
   }
-
-  return;
+  $episodesArea.show();
 }
+
+async function getEpisodesAndDisplay(evt) {
+  const showId = $(evt.target).closest(".Show").data("show-id");
+
+  const episodes = await getEpisodesOfShow(showId);
+  populateEpisodes(episodes);
+}
+
+
+$showsList.on('click', ".Show-getEpisodes", getEpisodesAndDisplay )
+
+
+
+
+
+
+// async function getEpisodesOfShow(id) {
+//   const response = await axios({
+//     baseURL: TVMAZE_BASE_URL,
+//     url: `shows/${id}/episodes`,
+//     method: "GET",
+//   });
+
+//   return response.data.map(e => ({
+//     id: e.id,
+//     name: e.name,
+//     season: e.season,
+//     number: e.number,
+//   }));
+// }
+
+
+// /** Given list of episodes, create markup for each and to DOM */
+
+// function populateEpisodes(episodes) {
+//   $episodesList.empty();
+
+//   for (let episode of episodes) {
+//     const $item = $(
+//         `<li>
+//          ${episode.name}
+//          (season ${episode.season}, episode ${episode.number})
+//        </li>
+//       `);
+
+//     $episodesList.append($item);
+//   }
+
+//   $episodesArea.show();
+// }
+
+
+// /** Handle click on episodes button: get episodes for show and display */
+
+// async function getEpisodesAndDisplay(evt) {
+//   // here's one way to get the ID of the show: search "closest" ancestor
+//   // with the class of .Show (which is put onto the enclosing div, which
+//   // has the .data-show-id attribute).
+//   const showId = $(evt.target).closest(".Show").data("show-id");
+
+//   // here's another way to get the ID of the show: search "closest" ancestor
+//   // that has an attribute of 'data-show-id'. This is called an "attribute
+//   // selector", and it's part of CSS selectors worth learning.
+//   // const showId = $(evt.target).closest("[data-show-id]").data("show-id");
+
+//   const episodes = await getEpisodesOfShow(showId);
+//   populateEpisodes(episodes);
+// }
+
+// $showsList.on("click", ".Show-getEpisodes", getEpisodesAndDisplay);
