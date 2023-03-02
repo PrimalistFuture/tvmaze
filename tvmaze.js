@@ -20,26 +20,28 @@ async function getShowsByTerm(term) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
 
   let response = await axios.get(`${TVMAZE_BASE_URL}search/shows`,
-  { params: { q: term } });
+    { params: { q: term } });
 
   let responseData = response.data;
   console.log(responseData, "responseData");
 
-  if (responseData.show.show.image === null) {
-    responseData.show.show.image = 'https://tinyurl.com/tv-missing';
-  } else {
-    imageSrc = show.image.original;
-  }
+  // if (responseData.show.show.image === null) {
+  //   responseData.show.show.image = 'https://tinyurl.com/tv-missing';
+  // } else {
+  //   imageSrc = show.image.original;
+  // }
 
-  let showData = responseData.map(data => ({"id": data.show.id,
-  "name": show.show.name, "summary": show.show.summary,
-  "image": show.show.image}))
+  let showData = responseData.map(data => ({
+    "id": data.show.id,
+    "name": data.show.name, "summary": data.show.summary,
+    "image": (data.show.image === null) ? 'https://tinyurl.com/tv-missing' : data.show.image.original
+  }));
 
 
-  console.log(showData, "showData");
+console.log(showData, "showData");
 
-  // Update response data to only include required info (map/loop/w/e)
-  return showData;
+// Update response data to only include required info (map/loop/w/e)
+return showData;
 }
 
 
@@ -54,18 +56,13 @@ function populateShows(shows) {
 
   console.log('Populate shows called, arrays = ' + shows);
   for (let show of shows) {
-    if (show.image === null) {
-      imageSrc = 'https://tinyurl.com/tv-missing';
-    } else {
-      imageSrc = show.image.original;
-    }
-    console.log(imageSrc)
+    console.log(imageSrc);
     const $show = $(
       `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
-              src="${imageSrc}"
-              alt="PLACEHOLDER"
+              src="${show.image}"
+              alt="Image of ${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -100,13 +97,43 @@ $searchForm.on("submit", async function (evt) {
   await searchForShowAndDisplay();
 });
 
+//
+
 
 /** Given a show ID, get from API and return (promise) array of episodes:
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+  // Get response from API about episodes
+  let response = await axios.get(`${TVMAZE_BASE_URL}shows/${id}/episodes`);
+  let episodesData = response.data;
+  console.log("Get episode function called, episodesData = " + episodesData);
+
+  episodesData.map(episode => episode = episode.name);
+
+  console.log(episodesData)
+
+  return episodesData;
+ }
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+  // Iterate through array of episode data objects
+    // Get episode name
+    // Generate a <li> element
+    // Append name to <li> element
+    // Append <li> to $episodesArea
+
+  // TEMPORARY:
+
+  $episodesArea.show();
+  let episodesData = getEpisodesOfShow(1767);
+
+  for (let episode of episodesData) {
+    $episodesArea.append($(`<li>${episode.name}</li>`));
+  }
+
+  return;
+}
